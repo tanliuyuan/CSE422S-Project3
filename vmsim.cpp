@@ -64,6 +64,8 @@ int main(const int argc, const char* argv[])
    
    long pageSequence[MAXNUMPAGES];
    long memoryFrames[MAXNUMFRAMES];
+   int FIFOReplaceIndex = 0;
+   
    for (int i = 0; i < MAXNUMFRAMES; i++) memoryFrames[i] = -1;
    
    int numPages = LoadInputData(inputFile, pageSequence);
@@ -99,6 +101,11 @@ int main(const int argc, const char* argv[])
                break;
             case FIFO:
                //REPLACEMENT WITH FIFO
+               memoryFrames[FIFOReplaceIndex] = pageSequence[i];
+               FIFOReplaceIndex++;
+               if (FIFOReplaceIndex == numFrames - 1) {
+                  FIFOReplaceIndex = 0;
+               }
                break;
             case CLOCK:
                //REPLACEMENT WITH CLOCK
@@ -119,7 +126,7 @@ int main(const int argc, const char* argv[])
             cout << "ERROR outputing memory" << endl;
             exit(-1);
          }
-         if (j != numframes-1) cout << "|";
+         if (j != numFrames-1) cout << "|";
       }
       cout << "]";
       if(pageFault) cout << " F";
