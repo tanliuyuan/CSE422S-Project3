@@ -35,6 +35,23 @@ int LoadInputData(const char* inputFile, long* pageSequence)
     return index;
 }
 
+// This function loads an array, which keeps track of the time since the last reference for each page in memory,
+// a referencedIndex, which represents the memory frame index of the last referenced page,
+// and the index of the largest number in the array (which would represent the page in memory with the longest time since last referenced)
+// increments the time since last referenced for all other pages (because they're not referenced),
+// and returns the index of the lagest number in LRUTimeSinceLastUsed, which would be the page index to be replaced next in memory
+int LRUUpdate(int* timeSinceLastUsed, int numFrames, int referencedIndex, int currentLargestIndex) {
+    int largestIndex = currentLargestIndex;
+    timeSinceLastUsed[referencedIndex] = -1;
+    for (int i = 0; i < numFrames; i++) {
+        timeSinceLastUsed[i]++;
+        if (timeSinceLastUsed[i] > timeSinceLastUsed[largestIndex]) {
+            largestIndex = i;
+        }
+    }
+    return largestIndex;
+}
+
 int main(const int argc, const char* argv[])
 {
     if (argc != 4) {
@@ -64,6 +81,15 @@ int main(const int argc, const char* argv[])
     long pageSequence[MAXNUMPAGES];
     long memoryFrames[MAXNUMFRAMES];
     int pageFaultCount = 0;
+    
+    // *** variables for LRU ***
+    // in LRU, keep track of the time since last referenced for each frame
+    int LRUTimeSinceLastUsed[MAXNUMFRAMES] = {0};
+    // the index corresponding to the largest number in LRUTimeSinceLastUsed, which would be the next memory frame index to be replaced
+    int LRUCurrentLargestIndex = 0;
+    
+    // *** variables for FIFO ***
+    // in FIFO, keep track of the next memory frame index to be replaced
     int FIFOReplaceIndex = 0;
     
     for (int i = 0; i < MAXNUMFRAMES; i++) memoryFrames[i] = -1;
@@ -78,6 +104,8 @@ int main(const int argc, const char* argv[])
             // Memory already contains page
             if (memoryFrames[j] == pageSequence[i]){
                 pageFault = false;
+                // update the last used array for LRU
+                LRUCurrentLargestIndex = LRUUpdate(LRUTimeSinceLastUsed, numFrames, j, LRUCurrentLargestIndex);
             }
         }
         
@@ -86,6 +114,8 @@ int main(const int argc, const char* argv[])
             // Frame empty, put it there
             if (memoryFrames[j] == -1){
                 memoryFrames[j] = pageSequence[i];
+                // update the last used array for LRU
+                LRUCurrentLargestIndex = LRUUpdate(LRUTimeSinceLastUsed, numFrames, j, LRUCurrentLargestIndex);
                 pageFault = false;
                 break;
             }
@@ -100,11 +130,15 @@ int main(const int argc, const char* argv[])
                     break;
                 case LRU:
                     //REPLACEMENT WITH LRU
+                    memoryFrames[LRUCurrentLargestIndex] = pageSequence[i];
+                    // update the last used array for LRU
+                    LRUCurrentLargestIndex = LRUUpdate(LRUTimeSinceLastUsed, numFrames, LRUCurrentLargestIndex, LRUCurrentLargestIndex);
                     break;
                 case FIFO:
                     //REPLACEMENT WITH FIFO
                     memoryFrames[FIFOReplaceIndex] = pageSequence[i];
                     FIFOReplaceIndex++;
+                    // if FIFOReplaceIndex reaches the last index in memoryFrames, reset it to 0
                     if (FIFOReplaceIndex == numFrames - 1) {
                         FIFOReplaceIndex = 0;
                     }
