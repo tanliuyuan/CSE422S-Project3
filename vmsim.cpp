@@ -82,6 +82,10 @@ int main(const int argc, const char* argv[])
     long memoryFrames[MAXNUMFRAMES];
     int pageFaultCount = 0;
     
+    // *** variables for OPT ***
+    int OPTCyclesUntilNextRef[MAXNUMFRAMES];
+    int OPTIndexOfFurthestRef;
+    
     // *** variables for LRU ***
     // in LRU, keep track of the time since last referenced for each frame
     int LRUTimeSinceLastUsed[MAXNUMFRAMES] = {0};
@@ -127,6 +131,29 @@ int main(const int argc, const char* argv[])
             switch (algorithm){
                 case OPT:
                     //REPLACEMENT WITH OPT
+                    
+                    // for each page in memory, find when it is next used
+                    for (int j = 0; j < numFrames; j++){
+                       // loop through rest of sequence to find when used
+                       for (int k = i+1; k < numPages; k++){
+                           // if the page reference is found at this index, remember how far reference is and stop checking
+                           if (pageSequence[k] == pageSequence[i]) {
+                              OPTCyclesUntilNextRef[j] = k;
+                              break;
+                           }
+                           // if page is not in sequence, set cycle count to high number
+                           if (k == numPages-1) OPTCyclesUntilNextRef[j] = MAXNUMPAGES+1;
+                       }
+                    }
+                    
+                    // find index of the furthest reference
+                    OPTIndexOfFurthestRef = 0;
+                    for (int j = 1; j < numFrames; j++){
+                       if (OPTCyclesUntilNextRef[j] > OPTCyclesUntilNextRef[OPTIndexOfFurthestRef]) OPTIndexOfFurthestRef = j;
+                    }
+                    
+                    // place page in memory in proper spot
+                    memoryFrames[OPTIndexOfFurthestRef] = pageSequence[i];
                     break;
                 case LRU:
                     //REPLACEMENT WITH LRU
