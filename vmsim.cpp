@@ -2,8 +2,8 @@
 //  vmsim.cpp
 //  project3
 //
-//  Created by Liuyuan Tan and Corey Glaser on 11/26/15.
-//  Copyright © 2015 Liuyuan Tan and Corey Glaser. All rights reserved.
+//  Created by Liuyuan Tan, David Latulipe and Corey Glaser on 11/26/15.
+//  Copyright © 2015 Liuyuan Tan, David Latulipe and Corey Glaser. All rights reserved.
 //
 
 #include <iostream>
@@ -80,7 +80,10 @@ int main(const int argc, const char* argv[])
 
     long pageSequence[MAXNUMPAGES];
     long memoryFrames[MAXNUMFRAMES];
+    bool clockUsageBit[MAXNUMFRAMES];//keeps track of each page frames usage bit
+    int clockHand = 0;//keeps track of the clock replacement algorithm
     int pageFaultCount = 0;
+    int fullPageStartFlag = 0;
 
     // *** variables for OPT ***
     int OPTCyclesUntilNextRef[MAXNUMFRAMES];
@@ -96,7 +99,11 @@ int main(const int argc, const char* argv[])
     // in FIFO, keep track of the next memory frame index to be replaced
     int FIFOReplaceIndex = 0;
 
-    for (int i = 0; i < MAXNUMFRAMES; i++) memoryFrames[i] = -1;
+    for (int i = 0; i < MAXNUMFRAMES; i++)
+    {
+        memoryFrames[i] = -1; //initialize entire arrays
+        clockUsageBit[i] = false;
+    }
 
     int numPages = LoadInputData(inputFile, pageSequence);
 
@@ -110,19 +117,26 @@ int main(const int argc, const char* argv[])
                 pageFault = false;
                 // update the last used array for LRU
                 LRUCurrentLargestIndex = LRUUpdate(LRUTimeSinceLastUsed, numFrames, j, LRUCurrentLargestIndex);
+                // update clock usage array
+                clockUsageBit[j] = true;
             }
         }
 
         // *** Check if empty frame in memory ***
-        for (int j = 0; j < numFrames; j++) {
-            // Frame empty, put it there
-            if (memoryFrames[j] == -1) {
-                memoryFrames[j] = pageSequence[i];
-                // update the last used array for LRU
-                LRUCurrentLargestIndex = LRUUpdate(LRUTimeSinceLastUsed, numFrames, j, LRUCurrentLargestIndex);
-                pageFault = false;
-                break;
+        if (pageFault)
+        {
+            for (int j = 0; j < numFrames; j++) {
+                // Frame empty, put it there
+                if (memoryFrames[j] == -1) {
+                    memoryFrames[j] = pageSequence[i];
+                    // update the last used array for LRU
+                    LRUCurrentLargestIndex = LRUUpdate(LRUTimeSinceLastUsed, numFrames, j, LRUCurrentLargestIndex);
+                    clockUsageBit[j] = true;
+                    pageFault = false;
+                    break;
+                }
             }
+            if (pageFault && (fullPageStartFlag == 0)) fullPageStartFlag = i;
         }
 
         // *** Process a page fault ***
@@ -172,6 +186,24 @@ int main(const int argc, const char* argv[])
                 break;
             case CLOCK:
                 //REPLACEMENT WITH CLOCK
+                //cycle thru all frames (starting at 0), check the usage bit for that frame
+                //if usage bit is not set - replace that page, set its bit, increment clock hand, and exit algorithm
+                //if usage is set - set bit to false and continue
+                for (int j = 0; j < numFrames + 1; ++j)
+                {
+                    if (clockUsageBit[clockHand])
+                    {
+                        clockUsageBit[clockHand] = false;
+                        if (++clockHand == numFrames) clockHand = 0; //circular clock
+                    }
+                    else
+                    {
+                        memoryFrames[clockHand] = pageSequence[i];
+                        if (++clockHand == numFrames) clockHand = 0; //circular clock
+                        break;
+                    }
+
+                }
                 break;
             default:
                 cout << "ERROR with replacement algorithm" << endl;
@@ -180,6 +212,7 @@ int main(const int argc, const char* argv[])
         }
 
         // *** Print memory information ***
+        if (pageSequence[i] < 10) cout << ' ';
         cout << pageSequence[i] << ": [";
         for (int j = 0; j < numFrames; j++) {
             if (memoryFrames[j] == -1)                             cout << "  ";
@@ -197,5 +230,6 @@ int main(const int argc, const char* argv[])
     }
 
     // *** Print miss rate ***
-    cout << "Miss rate = " << pageFaultCount << " / " << numPages << " = " << fixed << setprecision(2) << (double)pageFaultCount / (double)numPages * 100 << "%" << endl;
+    cout << "Miss rate = " << pageFaultCount << " / " << numPages - fullPageStartFlag << " = " << fixed << setprecision(2) << (double)pageFaultCount / (double)(numPages - fullPageStartFlag) * 100 << "%" << endl;
+    return 0;
 }
