@@ -151,8 +151,8 @@ int main(const int argc, const char* argv[])
                     // loop through rest of sequence to find when used
                     for (int k = i + 1; k < numPages; k++) {
                         // if the page reference is found at this index, remember how far reference is and stop checking
-                        if (pageSequence[k] == pageSequence[i]) {
-                            OPTCyclesUntilNextRef[j] = k;
+                        if (memoryFrames[j] == pageSequence[k]) {
+                            OPTCyclesUntilNextRef[j] = k - i;
                             break;
                         }
                         // if page is not in sequence, set cycle count to high number
