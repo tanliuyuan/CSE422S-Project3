@@ -23,8 +23,7 @@ int main(int argc, char *argv[])
 		if (isInt(argv[5])) arg5 = atoi(argv[5]);
 		else inError++;
 		arg6 = argv[6];
-		if (inError) cout << "vmgenWS requires 5 arguments: int ws_size, int LB, in UB, int range, and filename\n";
-		else
+		if (!inError)
 		{
 			vmgenWS vmgen(arg1, arg2, arg3, arg4, arg5, arg6);
 			vmgen.generateFile();
@@ -32,41 +31,40 @@ int main(int argc, char *argv[])
 
 	}
 	else inError++;
+	if (inError) cout << "vmgenWS requires 5 arguments: int ws_size, int LB, in UB, int range, and filename\n";
 	return 0;
 }
 
 int vmgenWS::generateFile()
 {
-	mt19937 generator1(rand1());
-	mt19937 generator2(rand2());
-	mt19937 generator3(rand3());
+	mt19937 generator1(time(RAND)) 
 	uniform_int_distribution<int> numDistribute(LB, UB - 1);
 	uniform_int_distribution<int> rangeDistribute(0, seqRange - 1);
 	uniform_int_distribution<int> finalDistribute(0, ws_size - 1);
 	outFile.open(genFile);
-	while (referencesCreated < seqLength)
+	while (referencesCreated < seqLength) //go until met command line requirements
 	{
-		ws.clear();
-		num_gen = numDistribute(generator1);
-		for (int i = 0; i < ws_size; ++i)
+		ws.clear(); //reset the working set array
+		num_gen = numDistribute(generator1); 
+		for (int i = 0; i < ws_size; ++i) //fill the working set
 		{
 			reroll = false;
-			ref = rangeDistribute(generator2);
+			ref = rangeDistribute(generator1);
 			for (int k = 0; k < i; ++k)
 			{
-				if (ref == ws[k]) reroll = true;
+				if (ref == ws[k]) reroll = true; //look for duplicates
 
 			}
-			if (!reroll) ws.push_back(ref);
-			else --i;
+			if (!reroll) ws.push_back(ref); //if unique to set, continue as normal
+			else --i;                       //else reroll
 		}
-		for (int i = 0; i < num_gen; ++i)
+		for (int i = 0; i < num_gen; ++i) //pull from the working set num_gen times
 		{
-			if (referencesCreated < seqLength)
+			if (referencesCreated < seqLength) //dont over commit to the file
 			{
-				ref = finalDistribute(generator3);
+				ref = finalDistribute(generator1); //pull from working set array
 				outFile << ws[ref] << ' ';
-				referencesCreated++;
+				referencesCreated++; //keep track of total created
 			}
 		}
 	}
