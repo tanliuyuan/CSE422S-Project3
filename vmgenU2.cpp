@@ -18,8 +18,8 @@ int main(int argc, char *argv[])
 		if (isInt(argv[2])) arg2 = atoi(argv[2]);
 		else cout << "vmgenU requires 3 arguments: int range, int number, and filename\n";
 		arg3 = argv[3];
-		vmgenU vmgen(arg1, arg2, arg3);
-		vmgen.generateFile();
+		vmgenU vmgen(arg1, arg2, arg3); //initialize vmgenU with command line data
+		vmgen.generateFile(); // run the generator
 
 	}
 	else cout << "vmgenU requires 3 arguments: int range, int number, and int filename\n";
@@ -28,12 +28,12 @@ int main(int argc, char *argv[])
 
 int vmgenU::generateFile()
 {
-	mt19937 generator(rand());
-	uniform_int_distribution<int> intDistribute(0, genRange - 1);
+	mt19937 generator(time(NULL)); // pseudo random generator, clock as seed
+	uniform_int_distribution<int> intDistribute(0, genRange - 1); //uniform generator in our needed range
 	outFile.open(genFile);
-	for (int i = 0; i < genLength; ++i)
+	for (int i = 0; i < genLength; ++i) //create specified page referenced
 	{
-		generated = intDistribute(generator);
+		generated = intDistribute(generator); //uniformly generate a number, using mt19937 as its source.
 		outFile << generated << ' ';
 	}
 	outFile.close();
