@@ -103,6 +103,7 @@ int main(const int argc, const char* argv[])
     {
         memoryFrames[i] = -1; //initialize entire arrays
         clockUsageBit[i] = false;
+        OPTCyclesUntilNextRef[i] = -1;
     }
 
     int numPages = LoadInputData(inputFile, pageSequence);
