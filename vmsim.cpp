@@ -200,6 +200,7 @@ int main(const int argc, const char* argv[])
                     else
                     {
                         memoryFrames[clockHand] = pageSequence[i];
+                        clockUsageBit[clockHand] = true;
                         if (++clockHand == numFrames) clockHand = 0; //circular clock
                         break;
                     }
