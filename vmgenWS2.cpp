@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 
 int vmgenWS::generateFile()
 {
-	mt19937 generator1(time(RAND)) 
+	mt19937 generator1(time(NULL)); 
 	uniform_int_distribution<int> numDistribute(LB, UB - 1);
 	uniform_int_distribution<int> rangeDistribute(0, seqRange - 1);
 	uniform_int_distribution<int> finalDistribute(0, ws_size - 1);
