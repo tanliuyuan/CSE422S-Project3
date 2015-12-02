@@ -1,5 +1,7 @@
 //-----------------vmgenU----------------------
 //David Latulipe
+//Liuyuan Tan
+//Corey Glaser
 //CSE 422 Project 3
 //Due December 1st 
 //-----------------vmgenU---------------------
