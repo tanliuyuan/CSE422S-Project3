@@ -180,7 +180,7 @@ int main(const int argc, const char* argv[])
                 memoryFrames[FIFOReplaceIndex] = pageSequence[i];
                 FIFOReplaceIndex++;
                 // if FIFOReplaceIndex reaches the last index in memoryFrames, reset it to 0
-                if (FIFOReplaceIndex == numFrames - 1) {
+                if (FIFOReplaceIndex == numFrames) {
                     FIFOReplaceIndex = 0;
                 }
                 break;
