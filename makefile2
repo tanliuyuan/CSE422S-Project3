@@ -1,0 +1,33 @@
+# the compiler is g++
+CC	= g++
+
+# compiler flags:
+# -O2	optimization flag
+# -Wall	displays compiler warnings
+FLAGS	= -O2 -Wall -w
+
+TARGET1	= vmsim
+TARGET2 = vmgenU
+TARGET3 = vmgenWS
+
+default: vmsim
+
+vmsim: vmsim.o
+	$(CC) $(FLAGS) -o $(TARGET1) vmsim.o
+vmsim.o: vmsim.cpp
+    $(CC) $(FLAGS) -c vmsim.cpp
+
+vmgenU: vmgenU.o
+	$(CC) $(FLAGS) -o $(TARGET2) vmgenU.o
+vmgenU.o: vmgenU.cpp
+    $(CC) $(FLAGS) -c vmgenU.cpp vmgenU.h
+
+vmgenWS: vmgenWS.o
+	$(CC) $(FLAGS) -o $(TARGET3) vmgenWS.o
+vmgenWS.o: vmgenWS.cpp
+    $(CC) $(FLAGS) -c vmgenWS.cpp vmgenWS.h
+	
+clean:
+	rm -f $(TARGET1) *.o *~ *.gch
+	rm -f $(TARGET2) *.o *~ *.gch
+	rm -f $(TARGET3) *.o *~ *.gch
