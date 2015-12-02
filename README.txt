@@ -7,9 +7,16 @@ First-In-First-Out (FIFO), and the single use-bit one-handed clock policy (CLOCK
 This project will require three separate executables: a page replacement simulator vmsim,
 and two page reference generators: vmgenU and vmgenWS.
 
+To compile the .cpp source code and produce the executables, run the make file by calling “make” under the source file folder. This call will automatically generate all three executables.
+
+To delete the executables, run “make clean” under the source file folder.
+
 -------------------------------------------------------------------------------------------
 vmsim 
 -------------------------------------------------------------------------------------------
+
+Example: ./vmsim 3 vmrefs.txt LRU
+
 accepts three command-line arguments in the following order:
  (a) the total number of physical memory frames (maximum 100),
  (b) an input filename where a sequence of page references is stored,
@@ -42,6 +49,9 @@ counting page faults and page references only after all frames have been initial
 -------------------------------------------------------------------------------------------
 vmgenU
 ------------------------------------------------------------------------------------------- 
+
+Example: ./vmgenU 10 200 vmrefs.txt
+
 accepts three command-line arguments in the following order:
  (a) the range of page references (maximum 100)
  (b) the length of the sequence of page references
@@ -55,6 +65,9 @@ this sequence into the file given as input.
 -------------------------------------------------------------------------------------------
 vmgenWS
 -------------------------------------------------------------------------------------------
+
+Example: ./vmgenWS 5 8 15 25 200 vmrefs.txt
+
 accepts six command-line arguments in the following order:
  (a) ws_size: the size of the working set,
  (b) LB – the lower bound on the number of pages to generate in a given working set, 
