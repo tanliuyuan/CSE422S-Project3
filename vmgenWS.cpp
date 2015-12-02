@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 
 	}
 	else inError++;
-	if (inError) cout << "vmgenWS requires 5 arguments: int ws_size, int LB, in UB, int range, and filename\n";
+	if (inError) cout << "vmgenWS requires 6 arguments: int ws_size, int LB, in UB, int range, int Seq Length, and filename\n";
 	return 0;
 }
 
